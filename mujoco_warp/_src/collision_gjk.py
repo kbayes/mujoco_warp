@@ -172,8 +172,20 @@ def support(geom: Geom, geomtype: int, dir: wp.vec3) -> SupportPoint:
       vert_edgeadr = geom.graphadr + 2
       vert_globalid = geom.graphadr + 2 + numvert
       edge_localid = geom.graphadr + 2 + 2 * numvert
+      # map continuous direction to discrete 3x3x3 grid (-1, 0, 1) indices
+      cx = wp.int32(local_dir[0] > 0.4) - wp.int32(local_dir[0] < -0.4) + 1
+      cy = wp.int32(local_dir[1] > 0.4) - wp.int32(local_dir[1] < -0.4) + 1
+      cz = wp.int32(local_dir[2] > 0.4) - wp.int32(local_dir[2] < -0.4) + 1
+      grid_idx = geom.mesh_extrema[geom.dataid, cx * 9 + cy * 3 + cz]
+
+      if geom.index >= 0:
+        cached_dot = wp.dot(local_dir, geom.vert[geom.vertadr + geom.graph[vert_globalid + geom.index]])
+        seed_dot = wp.dot(local_dir, geom.vert[geom.vertadr + geom.graph[vert_globalid + grid_idx]])
+        imax = wp.where(seed_dot > cached_dot, grid_idx, geom.index)
+      else:
+        imax = grid_idx
+
       prev = int(-1)
-      imax = wp.where(geom.index > -1, geom.index, 0)
       max_dist = wp.dot(local_dir, geom.vert[geom.vertadr + geom.graph[vert_globalid + imax]])
 
       # hillclimb until no change

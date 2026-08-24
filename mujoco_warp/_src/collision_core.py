@@ -59,7 +59,9 @@ class Geom:
   mesh_polymapadr: wp.array[int]
   mesh_polymapnum: wp.array[int]
   mesh_polymap: wp.array[int]
+  mesh_extrema: wp.array2d[int]
   index: int
+  dataid: int
 
 
 @wp.func
@@ -81,6 +83,7 @@ def geom_collision_pair_from_types(
   mesh_polymapadr: wp.array[int],
   mesh_polymapnum: wp.array[int],
   mesh_polymap: wp.array[int],
+  mesh_extrema: wp.array2d[int],
   # Data in:
   geom_xpos_in: wp.array2d[wp.vec3],
   geom_xmat_in: wp.array2d[wp.mat33],
@@ -109,6 +112,8 @@ def geom_collision_pair_from_types(
   geom2.normal = wp.vec3(geom2.rot[0, 2], geom2.rot[1, 2], geom2.rot[2, 2])
 
   dataid_setid = worldid % geom_dataid.shape[0]
+  geom1.dataid = geom_dataid[dataid_setid, g1]
+  geom2.dataid = geom_dataid[dataid_setid, g2]
 
   if geom_type1 == GeomType.MESH:
     dataid = geom_dataid[dataid_setid, g1]
@@ -127,6 +132,7 @@ def geom_collision_pair_from_types(
     geom1.mesh_polymapadr = mesh_polymapadr
     geom1.mesh_polymapnum = mesh_polymapnum
     geom1.mesh_polymap = mesh_polymap
+    geom1.mesh_extrema = mesh_extrema
 
   if geom_type2 == GeomType.MESH:
     dataid = geom_dataid[dataid_setid, g2]
@@ -145,6 +151,7 @@ def geom_collision_pair_from_types(
     geom2.mesh_polymapadr = mesh_polymapadr
     geom2.mesh_polymapnum = mesh_polymapnum
     geom2.mesh_polymap = mesh_polymap
+    geom2.mesh_extrema = mesh_extrema
 
   geom1.index = -1
   geom1.margin = 0.0
@@ -175,6 +182,7 @@ def geom_collision_pair(
   mesh_polymapadr: wp.array[int],
   mesh_polymapnum: wp.array[int],
   mesh_polymap: wp.array[int],
+  mesh_extrema: wp.array2d[int],
   # Data in:
   geom_xpos_in: wp.array2d[wp.vec3],
   geom_xmat_in: wp.array2d[wp.mat33],
@@ -201,6 +209,7 @@ def geom_collision_pair(
     mesh_polymapadr,
     mesh_polymapnum,
     mesh_polymap,
+    mesh_extrema,
     geom_xpos_in,
     geom_xmat_in,
     geom_type1,
